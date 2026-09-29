@@ -1,0 +1,11 @@
+# secrets — never commit tokens or PayWay keys
+.env
+
+# orders data and logs
+orders.json
+orders.tmp
+*.log
+
+__pycache__/
+*.pyc
+.DS_Store
