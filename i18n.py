@@ -8,17 +8,18 @@ DEFAULT_LANG = "km"
 
 TEXTS = {
     # ---------- ប៊ូតុង ----------
-    "btn_services": {"km": "🛒 សេវាកម្ម", "en": "🛒 Services", "zh": "🛒 服务"},
-    "btn_orders": {"km": "📦 ការកុម្ម៉ង់របស់ខ្ញុំ", "en": "📦 My Orders", "zh": "📦 我的订单"},
-    "btn_contact": {"km": "📞 ទំនាក់ទំនង", "en": "📞 Contact", "zh": "📞 联系我们"},
-    "btn_help": {"km": "ℹ️ ជំនួយ", "en": "ℹ️ Help", "zh": "ℹ️ 帮助"},
+    "btn_services": {"km": "🛍️ សេវាកម្ម", "en": "🛍️ Services", "zh": "🛍️ 服务"},
+    "btn_orders": {"km": "🧾 ការកុម្ម៉ង់ខ្ញុំ", "en": "🧾 My Orders", "zh": "🧾 我的订单"},
+    "btn_contact": {"km": "💬 ទំនាក់ទំនង", "en": "💬 Contact", "zh": "💬 联系我们"},
+    "btn_help": {"km": "❓ ជំនួយ", "en": "❓ Help", "zh": "❓ 帮助"},
     "btn_lang": {"km": "🌐 ភាសា", "en": "🌐 Language", "zh": "🌐 语言"},
-    "btn_back": {"km": "⬅️ ត្រឡប់ទៅម៉ឺនុយដើម", "en": "⬅️ Back to Menu", "zh": "⬅️ 返回主菜单"},
-    "btn_cancel": {"km": "❌ បោះបង់", "en": "❌ Cancel", "zh": "❌ 取消"},
-    "btn_pay": {"km": "💳 បង់ប្រាក់តាម ABA KHQR", "en": "💳 Pay with ABA KHQR", "zh": "💳 使用 ABA KHQR 付款"},
-    "btn_cancel_order": {"km": "❌ បោះបង់ការកុម្ម៉ង់", "en": "❌ Cancel Order", "zh": "❌ 取消订单"},
+    "btn_back": {"km": "🏠 ម៉ឺនុយដើម", "en": "🏠 Main Menu", "zh": "🏠 主菜单"},
+    "btn_prev_services": {"km": "↩️ សេវាកម្មទាំងអស់", "en": "↩️ All Services", "zh": "↩️ 全部服务"},
+    "btn_cancel": {"km": "✖️ បោះបង់", "en": "✖️ Cancel", "zh": "✖️ 取消"},
+    "btn_pay": {"km": "💳 បង់ប្រាក់ឥឡូវនេះ · ABA KHQR", "en": "💳 Pay Now · ABA KHQR", "zh": "💳 立即付款 · ABA KHQR"},
+    "btn_cancel_order": {"km": "✖️ បោះបង់ការកុម្ម៉ង់", "en": "✖️ Cancel Order", "zh": "✖️ 取消订单"},
     "btn_check": {"km": "🔄 ពិនិត្យការបង់ប្រាក់", "en": "🔄 Check Payment", "zh": "🔄 查询付款"},
-    "btn_open_aba": {"km": "📱 បើក ABA Mobile បង់ប្រាក់", "en": "📱 Pay in ABA Mobile", "zh": "📱 打开 ABA Mobile 付款"},
+    "btn_open_aba": {"km": "📲 បង់ក្នុង ABA Mobile", "en": "📲 Pay in ABA Mobile", "zh": "📲 在 ABA Mobile 付款"},
 
     # ---------- ភាសា ----------
     "lang_prompt": {"km": "🌐 សូមជ្រើសរើសភាសា\nPlease choose your language\n请选择语言",

@@ -31,7 +31,8 @@
             "km": "🛡 ធានា ១ ខែ\n🎓 បង្រៀនពីសូន្យ ដល់កម្រិតជំនាញ\n📈 លទ្ធផលល្អ\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
             "en": "🛡 1-month warranty\n🎓 Training from zero to expert\n📈 Great results\n🔑 Full Owner access handed over",
             "zh": "🛡 保修 1 个月\n🎓 从零基础到专家的培训\n📈 效果出色\n🔑 移交完整 Owner 权限"
-          }
+          },
+          "icon": "💎"
         },
         {
           "id": "standard",
@@ -45,7 +46,8 @@
             "km": "🛡 ធានា ១ សប្តាហ៍\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
             "en": "🛡 1-week warranty\n🔑 Full Owner access handed over",
             "zh": "🛡 保修 1 周\n🔑 移交完整 Owner 权限"
-          }
+          },
+          "icon": "⭐"
         }
       ]
     },
@@ -79,7 +81,8 @@
             "km": "🛡 ធានា ១ ខែ\n🎓 បង្រៀនពីសូន្យ ដល់កម្រិតជំនាញ\n📈 លទ្ធផលល្អ",
             "en": "🛡 1-month warranty\n🎓 Training from zero to expert\n📈 Great results",
             "zh": "🛡 保修 1 个月\n🎓 从零基础到专家的培训\n📈 效果出色"
-          }
+          },
+          "icon": "💎"
         }
       ]
     }

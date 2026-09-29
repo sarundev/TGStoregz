@@ -136,23 +136,31 @@ def order_summary(o: dict, lang: str) -> str:
 
 
 # ---------- ប៊ូតុង ----------
+# ពណ៌ប៊ូតុង (Bot API 9.4+): "primary" ខៀវ · "success" បៃតង · "danger" ក្រហម
+BLUE, GREEN, RED = "primary", "success", "danger"
+
+
+def button(text: str, style: str = None, **kwargs) -> InlineKeyboardButton:
+    return InlineKeyboardButton(text, api_kwargs={"style": style} if style else None, **kwargs)
+
+
 def main_menu(lang: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(t("btn_services", lang), callback_data="services")],
-        [InlineKeyboardButton(t("btn_orders", lang), callback_data="orders"),
-         InlineKeyboardButton(t("btn_contact", lang), callback_data="contact")],
-        [InlineKeyboardButton(t("btn_help", lang), callback_data="help"),
-         InlineKeyboardButton(t("btn_lang", lang), callback_data="lang")],
+        [button(t("btn_services", lang), BLUE, callback_data="services")],
+        [button(t("btn_orders", lang), callback_data="orders"),
+         button(t("btn_contact", lang), callback_data="contact")],
+        [button(t("btn_help", lang), callback_data="help"),
+         button(t("btn_lang", lang), callback_data="lang")],
     ])
 
 
 def lang_menu() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup([[InlineKeyboardButton(name, callback_data=f"lang:{code}")
+    return InlineKeyboardMarkup([[button(name, BLUE, callback_data=f"lang:{code}")
                                   for code, name in LANGS.items()]])
 
 
 def back_button(lang: str) -> list:
-    return [InlineKeyboardButton(t("btn_back", lang), callback_data="menu")]
+    return [button(t("btn_back", lang), callback_data="menu")]
 
 
 def back_menu(lang: str) -> InlineKeyboardMarkup:
@@ -162,12 +170,12 @@ def back_menu(lang: str) -> InlineKeyboardMarkup:
 def admin_buttons(o: dict):
     oid = o["id"]
     if o["status"] == "review":
-        return InlineKeyboardMarkup([[InlineKeyboardButton("✅ ត្រឹមត្រូវ", callback_data=f"adm:approve:{oid}"),
-                                      InlineKeyboardButton("🚫 មិនត្រឹមត្រូវ", callback_data=f"adm:reject:{oid}")]])
+        return InlineKeyboardMarkup([[button("✅ ត្រឹមត្រូវ", GREEN, callback_data=f"adm:approve:{oid}"),
+                                      button("✖️ មិនត្រឹមត្រូវ", RED, callback_data=f"adm:reject:{oid}")]])
     if o["status"] == "paid":
-        return InlineKeyboardMarkup([[InlineKeyboardButton("🚀 ចាប់ផ្តើមធ្វើ", callback_data=f"adm:start:{oid}")]])
+        return InlineKeyboardMarkup([[button("🚀 ចាប់ផ្តើមធ្វើ", BLUE, callback_data=f"adm:start:{oid}")]])
     if o["status"] == "working":
-        return InlineKeyboardMarkup([[InlineKeyboardButton("✅ រួចរាល់", callback_data=f"adm:done:{oid}")]])
+        return InlineKeyboardMarkup([[button("🏁 រួចរាល់", GREEN, callback_data=f"adm:done:{oid}")]])
     return None
 
 
@@ -315,7 +323,7 @@ async def send_payment(update: Update, context: ContextTypes.DEFAULT_TYPE, o: di
     chat_id = update.effective_chat.id
     lang = o.get("lang", DEFAULT_LANG)
     summary = order_summary(o, lang)
-    pay_buttons = [InlineKeyboardButton(t("btn_cancel_order", lang), callback_data=f"cancel:{o['id']}")]
+    pay_buttons = [button(t("btn_cancel_order", lang), RED, callback_data=f"cancel:{o['id']}")]
 
     if PAYMENT_MODE in AUTO_MODES:
         try:
@@ -334,10 +342,10 @@ async def send_payment(update: Update, context: ContextTypes.DEFAULT_TYPE, o: di
         rows = []
         if PUBLIC_URL and pay.get("deeplink"):
             # បើក ABA Mobile ភ្លាមៗ តាមរយៈទំព័របញ្ជូនបន្តរបស់ bot
-            rows.append([InlineKeyboardButton(t("btn_open_aba", lang), url=f"{PUBLIC_URL}/aba/{o['id']}")])
+            rows.append([button(t("btn_open_aba", lang), BLUE, url=f"{PUBLIC_URL}/aba/{o['id']}")])
         elif pay.get("checkout_url"):
             # គ្មាន PUBLIC_URL ឬគ្មាន deeplink (test mode) — ប្រើទំព័របង់ប្រាក់របស់ RielPay
-            rows.append([InlineKeyboardButton(t("btn_open_aba", lang), url=pay["checkout_url"])])
+            rows.append([button(t("btn_open_aba", lang), BLUE, url=pay["checkout_url"])])
         rows.append(pay_buttons)  # bot ពិនិត្យការបង់ប្រាក់ដោយស្វ័យប្រវត្តិ — មិនចាំបាច់មានប៊ូតុងពិនិត្យ
         await context.bot.send_photo(chat_id, BytesIO(pay["qr_image"]),
                                      caption=t("pay_auto", lang, summary=summary, minutes=QR_LIFETIME_MIN),
@@ -426,7 +434,7 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     elif action == "services":
         catalog = load_services()
-        rows = [[InlineKeyboardButton(tr(s["name"], lang), callback_data=f"svc:{s['id']}")] for s in catalog["services"]]
+        rows = [[button(tr(s["name"], lang), BLUE, callback_data=f"svc:{s['id']}")] for s in catalog["services"]]
         await show(f"<b>{t('btn_services', lang)}</b>\n\n{t('choose_service', lang)}",
                    InlineKeyboardMarkup(rows + [back_button(lang)]))
 
@@ -438,12 +446,12 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await show(welcome_text(lang), main_menu(lang))
             return
         cur = catalog.get("currency", "USD")
-        lines = [f"📦 <b>{esc(tr(p['name'], lang))}</b> — {money(p['price'], cur)}\n    "
+        lines = [f"{p.get('icon', '📦')} <b>{esc(tr(p['name'], lang))}</b> — {money(p['price'], cur)}\n    "
                  + esc(tr(p.get("detail", ""), lang)).replace("\n", "\n    ")
                  for p in svc["packages"]]
-        rows = [[InlineKeyboardButton(f"{tr(p['name'], lang)} — {money(p['price'], cur)}",
+        rows = [[button(f"{p.get('icon', '📦')} {tr(p['name'], lang)} · {money(p['price'], cur)}", GREEN,
                                       callback_data=f"pkg:{sid}:{p['id']}")] for p in svc["packages"]]
-        rows.append([InlineKeyboardButton(f"⬅️ {t('btn_services', lang)}", callback_data="services")])
+        rows.append([button(t("btn_prev_services", lang), callback_data="services")])
         await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n\n{esc(tr(svc['description'], lang))}\n\n"
                    + "\n\n".join(lines) + f"\n\n{t('choose_package', lang)}",
                    InlineKeyboardMarkup(rows + [back_button(lang)]))
@@ -457,7 +465,7 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.user_data["draft"] = {"sid": sid, "pid": pid}
         await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n📦 {esc(tr(pkg['name'], lang))} — {money(pkg['price'], cur)}"
                    f"\n\n{esc(tr(svc['ask'], lang))}",
-                   InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_cancel", lang), callback_data="menu")]]))
+                   InlineKeyboardMarkup([[button(t("btn_cancel", lang), RED, callback_data="menu")]]))
 
     elif action == "pay":
         draft = context.user_data.pop("draft", None)
@@ -526,8 +534,8 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         t("confirm", lang, summary=summary), parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton(t("btn_pay", lang), callback_data="pay")],
-            [InlineKeyboardButton(t("btn_cancel", lang), callback_data="menu")],
+            [button(t("btn_pay", lang), GREEN, callback_data="pay")],
+            [button(t("btn_cancel", lang), RED, callback_data="menu")],
         ]))
 
 
