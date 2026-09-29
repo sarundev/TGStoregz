@@ -9,14 +9,14 @@
         "zh": "🤖 定制 Boost 机器人"
       },
       "description": {
-        "km": "យើងបង្កើត Bot តេឡេក្រាមផ្ទាល់ខ្លួន សម្រាប់ Boost Channel ឬ Group របស់អ្នក។",
-        "en": "We build a custom Telegram bot to boost your channel or group.",
-        "zh": "我们为您定制 Telegram 机器人，为您的频道或群组进行 Boost。"
+        "km": "យើងបង្កើត Bot តេឡេក្រាមផ្ទាល់ខ្លួន សម្រាប់ Boost Ads។",
+        "en": "We build a custom Telegram bot to boost your ads.",
+        "zh": "我们为您定制 Telegram 机器人，用于 Boost 广告。"
       },
       "ask": {
-        "km": "✍️ សូមផ្ញើព័ត៌មាន៖\n• ឈ្មោះ Bot ដែលអ្នកចង់បាន\n• Link Channel/Group ដែលត្រូវ Boost\n• មុខងារបន្ថែម (បើមាន)",
-        "en": "✍️ Please send:\n• The bot name you want\n• The channel/group link to boost\n• Extra features (if any)",
-        "zh": "✍️ 请发送：\n• 您想要的机器人名称\n• 需要 Boost 的频道/群组链接\n• 其他功能需求（如有）"
+        "km": "✍️ សូមផ្ញើឈ្មោះ Bot ដែលអ្នកចង់បាន",
+        "en": "✍️ Please send the bot name you want",
+        "zh": "✍️ 请发送您想要的机器人名称"
       },
       "packages": [
         {
@@ -28,9 +28,9 @@
           },
           "price": 780,
           "detail": {
-            "km": "🛡 ធានា ១ ខែ\n🎓 បង្រៀនពីសូន្យ ដល់កម្រិតជំនាញ\n📈 លទ្ធផលល្អ\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
-            "en": "🛡 1-month warranty\n🎓 Training from zero to expert\n📈 Great results\n🔑 Full Owner access handed over",
-            "zh": "🛡 保修 1 个月\n🎓 从零基础到专家的培训\n📈 效果出色\n🔑 移交完整 Owner 权限"
+            "km": "⏳ រយៈពេលធ្វើ ៧ ថ្ងៃ ដល់ ៣០ ថ្ងៃ\n🛡 ធានា ១ ខែ\n🎓 បង្រៀនពីសូន្យ ដល់កម្រិតជំនាញ\n📈 លទ្ធផលល្អ\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
+            "en": "⏳ Delivery time: 7–30 days\n🛡 1-month warranty\n🎓 Training from zero to expert\n📈 Great results\n🔑 Full Owner access handed over",
+            "zh": "⏳ 完成时间：7–30 天\n🛡 保修 1 个月\n🎓 从零基础到专家的培训\n📈 效果出色\n🔑 移交完整 Owner 权限"
           },
           "icon": "💎"
         },
@@ -41,11 +41,11 @@
             "en": "Standard Package",
             "zh": "标准套餐"
           },
-          "price": 10,
+          "price": 480,
           "detail": {
-            "km": "🛡 ធានា ១ សប្តាហ៍\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
-            "en": "🛡 1-week warranty\n🔑 Full Owner access handed over",
-            "zh": "🛡 保修 1 周\n🔑 移交完整 Owner 权限"
+            "km": "⏳ រយៈពេលធ្វើ ៧ ថ្ងៃ ដល់ ៣០ ថ្ងៃ\n🛡 ធានា ១ សប្តាហ៍\n🔑 ប្រគល់សិទ្ធិ Owner ពេញលេញ",
+            "en": "⏳ Delivery time: 7–30 days\n🛡 1-week warranty\n🔑 Full Owner access handed over",
+            "zh": "⏳ 完成时间：7–30 天\n🛡 保修 1 周\n🔑 移交完整 Owner 权限"
           },
           "icon": "⭐"
         }

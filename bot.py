@@ -469,7 +469,7 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             await show(welcome_text(lang), main_menu(lang))
             return
         context.user_data["draft"] = {"sid": sid, "pid": pid}
-        await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n📦 {esc(tr(pkg['name'], lang))} — {money(pkg['price'], cur)}"
+        await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n{pkg.get('icon', '📦')} {esc(tr(pkg['name'], lang))} — {money(pkg['price'], cur)}"
                    f"\n\n{esc(tr(svc['ask'], lang))}",
                    InlineKeyboardMarkup([[button(t("btn_cancel", lang), RED, callback_data="menu")]]))
 
