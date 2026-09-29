@@ -55,7 +55,10 @@ elif PAYMENT_MODE == "payway":
     )
 
 SERVICES_FILE = BASE_DIR / "services.json"
-DATA_FILE = BASE_DIR / "orders.json"
+# នៅលើ Railway កំណត់ DATA_DIR=/data (Volume) ដើម្បីកុំឱ្យការកុម្ម៉ង់បាត់ពេល redeploy
+DATA_DIR = Path(os.getenv("DATA_DIR") or BASE_DIR)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_FILE = DATA_DIR / "orders.json"
 
 logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)  # កុំឱ្យ log មាន token
