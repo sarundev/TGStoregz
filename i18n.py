@@ -35,17 +35,17 @@ TEXTS = {
 
     # ---------- ម៉ឺនុយ ----------
     "welcome": {
-        "km": "✈️ <b>{title}</b>\n\nសេវាកម្មតេឡេក្រាម បង់ប្រាក់ងាយស្រួលតាម <b>ABA KHQR</b>។\n\n"
+        "km": "✈️ <b>{title}</b>\n\nសេវាកម្មតេឡេក្រាម បង់ប្រាក់ងាយស្រួលតាម <b>ABA KHQR &amp; Crypto</b>។\n\n"
               "<b>{services}</b> — មើល និងកុម្ម៉ង់សេវាកម្ម។\n"
               "<b>{orders}</b> — តាមដានស្ថានភាពការកុម្ម៉ង់។\n"
               "<b>{contact}</b> — ទាក់ទងក្រុមការងារ។\n\n"
               "👇 សូមជ្រើសរើសជម្រើសខាងក្រោម។",
-        "en": "✈️ <b>{title}</b>\n\nTelegram services with easy payment via <b>ABA KHQR</b>.\n\n"
+        "en": "✈️ <b>{title}</b>\n\nTelegram services with easy payment via <b>ABA KHQR &amp; Crypto</b>.\n\n"
               "<b>{services}</b> — browse and order services.\n"
               "<b>{orders}</b> — track your order status.\n"
               "<b>{contact}</b> — reach our team.\n\n"
               "👇 Please choose an option below.",
-        "zh": "✈️ <b>{title}</b>\n\nTelegram 服务，通过 <b>ABA KHQR</b> 轻松付款。\n\n"
+        "zh": "✈️ <b>{title}</b>\n\nTelegram 服务，通过 <b>ABA KHQR 和加密货币</b> 轻松付款。\n\n"
               "<b>{services}</b> — 浏览并订购服务。\n"
               "<b>{orders}</b> — 查看订单状态。\n"
               "<b>{contact}</b> — 联系我们的团队。\n\n"
