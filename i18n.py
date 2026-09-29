@@ -13,6 +13,7 @@ TEXTS = {
     "btn_contact": {"km": "📨 ទំនាក់ទំនង", "en": "📨 Contact", "zh": "📨 联系我们"},
     "btn_help": {"km": "💡 ជំនួយ", "en": "💡 Help", "zh": "💡 帮助"},
     "btn_lang": {"km": "🌐 ភាសា", "en": "🌐 Language", "zh": "🌐 语言"},
+    "btn_channel": {"km": "📣 Channel របស់យើង", "en": "📣 Our Channel", "zh": "📣 官方频道"},
     "btn_back": {"km": "🏠 ម៉ឺនុយដើម", "en": "🏠 Main Menu", "zh": "🏠 主菜单"},
     "btn_prev_services": {"km": "↩️ សេវាកម្មទាំងអស់", "en": "↩️ All Services", "zh": "↩️ 全部服务"},
     "btn_cancel": {"km": "✖️ បោះបង់", "en": "✖️ Cancel", "zh": "✖️ 取消"},

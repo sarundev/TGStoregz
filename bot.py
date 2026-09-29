@@ -34,6 +34,8 @@ CONTACT_TEXT = os.getenv("CONTACT_TEXT", "")
 # គណនីតេឡេក្រាមសម្រាប់ទទួលការបង់ប្រាក់ជាមួយ Crypto (ឧ. sarun_chann)
 # បើទទេ យក @username ពី CONTACT_TEXT
 _contact_user = re.search(r"@([A-Za-z0-9_]{5,32})", CONTACT_TEXT)
+# Channel របស់ហាង (ប៊ូតុងនៅម៉ឺនុយដើម)
+CHANNEL_USERNAME = os.getenv("CHANNEL_USERNAME", "TG168expert").lstrip("@")
 CRYPTO_CONTACT = (os.getenv("CRYPTO_CONTACT") or (_contact_user.group(1) if _contact_user else "")).lstrip("@")
 ADMIN_LANG = "km"  # សារទៅ admin / group ជាភាសាខ្មែរ
 
@@ -157,6 +159,7 @@ def main_menu(lang: str) -> InlineKeyboardMarkup:
          button(t("btn_contact", lang), callback_data="contact")],
         [button(t("btn_help", lang), callback_data="help"),
          button(t("btn_lang", lang), callback_data="lang")],
+        *([[button(t("btn_channel", lang), url=f"https://t.me/{CHANNEL_USERNAME}")]] if CHANNEL_USERNAME else []),
     ])
 
 
