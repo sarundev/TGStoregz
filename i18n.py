@@ -17,6 +17,12 @@ TEXTS = {
     "btn_prev_services": {"km": "↩️ សេវាកម្មទាំងអស់", "en": "↩️ All Services", "zh": "↩️ 全部服务"},
     "btn_cancel": {"km": "✖️ បោះបង់", "en": "✖️ Cancel", "zh": "✖️ 取消"},
     "btn_pay": {"km": "💳 បង់ប្រាក់ឥឡូវនេះ · ABA KHQR", "en": "💳 Pay Now · ABA KHQR", "zh": "💳 立即付款 · ABA KHQR"},
+    "btn_crypto": {"km": "🪙 បង់ប្រាក់ជាមួយ Crypto", "en": "🪙 Pay with Crypto", "zh": "🪙 使用加密货币付款"},
+    "crypto_message": {
+        "km": "សួស្តី! ខ្ញុំចង់បង់ប្រាក់ជាមួយ Crypto សម្រាប់៖\n🛒 {service}\n📦 {package}\n💵 {price}\n📝 {info}",
+        "en": "Hi! I'd like to pay with crypto for:\n🛒 {service}\n📦 {package}\n💵 {price}\n📝 {info}",
+        "zh": "您好！我想用加密货币支付：\n🛒 {service}\n📦 {package}\n💵 {price}\n📝 {info}",
+    },
     "btn_cancel_order": {"km": "✖️ បោះបង់ការកុម្ម៉ង់", "en": "✖️ Cancel Order", "zh": "✖️ 取消订单"},
     "btn_check": {"km": "🔄 ពិនិត្យការបង់ប្រាក់", "en": "🔄 Check Payment", "zh": "🔄 查询付款"},
     "btn_open_aba": {"km": "📲 បង់ក្នុង ABA Mobile", "en": "📲 Pay in ABA Mobile", "zh": "📲 在 ABA Mobile 付款"},

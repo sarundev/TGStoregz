@@ -3,10 +3,12 @@ import html
 import json
 import logging
 import os
+import re
 import secrets
 from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import quote
 
 from dotenv import load_dotenv
 from telegram import BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -29,6 +31,10 @@ ADMIN_IDS = {int(x) for x in os.getenv("ADMIN_IDS", "").replace(" ", "").split("
 ORDER_GROUP_ID = int(os.getenv("ORDER_GROUP_ID") or 0)
 BOT_TITLE = os.getenv("BOT_TITLE", "TG ExpertG")
 CONTACT_TEXT = os.getenv("CONTACT_TEXT", "")
+# គណនីតេឡេក្រាមសម្រាប់ទទួលការបង់ប្រាក់ជាមួយ Crypto (ឧ. sarun_chann)
+# បើទទេ យក @username ពី CONTACT_TEXT
+_contact_user = re.search(r"@([A-Za-z0-9_]{5,32})", CONTACT_TEXT)
+CRYPTO_CONTACT = (os.getenv("CRYPTO_CONTACT") or (_contact_user.group(1) if _contact_user else "")).lstrip("@")
 ADMIN_LANG = "km"  # សារទៅ admin / group ជាភាសាខ្មែរ
 
 # manual  = រូប QR ABA ផ្ទាល់ខ្លួន + អតិថិជនផ្ញើវិក្កយបត្រ + admin ពិនិត្យ
@@ -531,12 +537,16 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     draft["info"] = update.message.text.strip()[:1000]
     summary = (f"🛒 {esc(tr(svc['name'], lang))}\n📦 {esc(tr(pkg['name'], lang))}\n"
                f"💵 <b>{money(pkg['price'], cur)}</b>\n📝 {esc(draft['info'])}")
-    await update.message.reply_text(
-        t("confirm", lang, summary=summary), parse_mode=ParseMode.HTML,
-        reply_markup=InlineKeyboardMarkup([
-            [button(t("btn_pay", lang), GREEN, callback_data="pay")],
-            [button(t("btn_cancel", lang), RED, callback_data="menu")],
-        ]))
+    rows = [[button(t("btn_pay", lang), GREEN, callback_data="pay")]]
+    if CRYPTO_CONTACT:
+        # បើកការជជែកជាមួយក្រុមការងារ ដោយមានព័ត៌មានការកុម្ម៉ង់សរសេររួចជាស្រេច
+        message = t("crypto_message", lang, service=tr(svc["name"], lang), package=tr(pkg["name"], lang),
+                    price=money(pkg["price"], cur), info=draft["info"][:300])
+        rows.append([button(t("btn_crypto", lang), BLUE,
+                            url=f"https://t.me/{CRYPTO_CONTACT}?text={quote(message)}")])
+    rows.append([button(t("btn_cancel", lang), RED, callback_data="menu")])
+    await update.message.reply_text(t("confirm", lang, summary=summary), parse_mode=ParseMode.HTML,
+                                    reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def on_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
