@@ -36,7 +36,8 @@ CONTACT_TEXT = os.getenv("CONTACT_TEXT", "")
 _contact_user = re.search(r"@([A-Za-z0-9_]{5,32})", CONTACT_TEXT)
 # Channel របស់ហាង (ប៊ូតុងនៅម៉ឺនុយដើម)
 CHANNEL_USERNAME = os.getenv("CHANNEL_USERNAME", "TG168expert").lstrip("@")
-CRYPTO_CONTACT = (os.getenv("CRYPTO_CONTACT") or (_contact_user.group(1) if _contact_user else "")).lstrip("@")
+CONTACT_USERNAME = _contact_user.group(1) if _contact_user else ""
+CRYPTO_CONTACT = (os.getenv("CRYPTO_CONTACT") or CONTACT_USERNAME).lstrip("@")
 ADMIN_LANG = "km"  # សារទៅ admin / group ជាភាសាខ្មែរ
 
 # manual  = រូប QR ABA ផ្ទាល់ខ្លួន + អតិថិជនផ្ញើវិក្កយបត្រ + admin ពិនិត្យ
@@ -119,6 +120,13 @@ def money(amount: float, currency: str) -> str:
     return f"${amount:,.2f}" if currency.upper() == "USD" else f"{int(amount):,}៛"
 
 
+def short_money(amount: float, currency: str) -> str:
+    """សម្រាប់ប៊ូតុង: $480 ជំនួស $480.00"""
+    if currency.upper() == "USD" and float(amount).is_integer():
+        return f"${int(amount):,}"
+    return money(amount, currency)
+
+
 def esc(text) -> str:
     return html.escape(str(text))
 
@@ -147,29 +155,58 @@ def order_summary(o: dict, lang: str) -> str:
 # ពណ៌ប៊ូតុង (Bot API 9.4+): "primary" ខៀវ · "success" បៃតង · "danger" ក្រហម
 BLUE, GREEN, RED = "primary", "success", "danger"
 
+# រូបតំណាងមានចលនា (custom emoji) សម្រាប់ប៊ូតុង — ម្ចាស់ bot ត្រូវមាន Telegram Premium
+# កំណត់ដោយ /seticon ឈ្មោះ 🎉  ហើយរក្សាទុកក្នុង button_icons.json
+ICONS_FILE = DATA_DIR / "button_icons.json"
+ICON_KEYS = {
+    "services": "🚀 សេវាកម្ម", "orders": "📋 ការកុម្ម៉ង់ខ្ញុំ", "contact": "📨 ទំនាក់ទំនង", "help": "💡 ជំនួយ",
+    "lang": "🌐 ភាសា", "channel": "📣 Channel", "back": "🏠 ម៉ឺនុយដើម", "prev_services": "↩️ សេវាកម្មទាំងអស់",
+    "lang_km": "🇰🇭 ខ្មែរ", "lang_en": "🇬🇧 English", "lang_zh": "🇨🇳 中文",
+    "pay": "💳 បង់ប្រាក់", "crypto": "🪙 Crypto", "cancel": "✖️ បោះបង់", "cancel_order": "✖️ បោះបង់ការកុម្ម៉ង់",
+    "open_aba": "📲 ABA Mobile", "chat": "💬 ជជែកជាមួយយើង",
+    "approve": "✅ ត្រឹមត្រូវ (admin)", "reject": "✖️ មិនត្រឹមត្រូវ (admin)",
+    "start_work": "🚀 ចាប់ផ្តើមធ្វើ (admin)", "done": "🏁 រួចរាល់ (admin)",
+}
 
-def button(text: str, style: str = None, **kwargs) -> InlineKeyboardButton:
-    return InlineKeyboardButton(text, api_kwargs={"style": style} if style else None, **kwargs)
+
+def load_icons() -> dict:
+    try:
+        return json.loads(ICONS_FILE.read_text(encoding="utf-8"))
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+ICONS = load_icons()
+LEADING_EMOJI = re.compile(r"^[^\w\s]+\s+")
+
+
+def button(text: str, style: str = None, icon: str = None, **kwargs) -> InlineKeyboardButton:
+    extra = {"style": style} if style else {}
+    icon_id = ICONS.get(icon) if icon else None
+    if icon_id:
+        extra["icon_custom_emoji_id"] = icon_id
+        text = LEADING_EMOJI.sub("", text, count=1)  # រូបមានចលនាជំនួស emoji ធម្មតា
+    return InlineKeyboardButton(text, api_kwargs=extra or None, **kwargs)
 
 
 def main_menu(lang: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
-        [button(t("btn_services", lang), BLUE, callback_data="services")],
-        [button(t("btn_orders", lang), callback_data="orders"),
-         button(t("btn_contact", lang), callback_data="contact")],
-        [button(t("btn_help", lang), callback_data="help"),
-         button(t("btn_lang", lang), callback_data="lang")],
-        *([[button(t("btn_channel", lang), url=f"https://t.me/{CHANNEL_USERNAME}")]] if CHANNEL_USERNAME else []),
+        [button(t("btn_services", lang), BLUE, "services", callback_data="services")],
+        [button(t("btn_orders", lang), icon="orders", callback_data="orders"),
+         button(t("btn_contact", lang), icon="contact", callback_data="contact")],
+        [button(t("btn_help", lang), icon="help", callback_data="help"),
+         button(t("btn_lang", lang), icon="lang", callback_data="lang")],
+        *([[button(t("btn_channel", lang), GREEN, "channel", url=f"https://t.me/{CHANNEL_USERNAME}")]] if CHANNEL_USERNAME else []),
     ])
 
 
 def lang_menu() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup([[button(name, BLUE, callback_data=f"lang:{code}")
+    return InlineKeyboardMarkup([[button(name, BLUE, f"lang_{code}", callback_data=f"lang:{code}")
                                   for code, name in LANGS.items()]])
 
 
 def back_button(lang: str) -> list:
-    return [button(t("btn_back", lang), callback_data="menu")]
+    return [button(t("btn_back", lang), icon="back", callback_data="menu")]
 
 
 def back_menu(lang: str) -> InlineKeyboardMarkup:
@@ -179,12 +216,12 @@ def back_menu(lang: str) -> InlineKeyboardMarkup:
 def admin_buttons(o: dict):
     oid = o["id"]
     if o["status"] == "review":
-        return InlineKeyboardMarkup([[button("✅ ត្រឹមត្រូវ", GREEN, callback_data=f"adm:approve:{oid}"),
-                                      button("✖️ មិនត្រឹមត្រូវ", RED, callback_data=f"adm:reject:{oid}")]])
+        return InlineKeyboardMarkup([[button("✅ ត្រឹមត្រូវ", GREEN, "approve", callback_data=f"adm:approve:{oid}"),
+                                      button("✖️ មិនត្រឹមត្រូវ", RED, "reject", callback_data=f"adm:reject:{oid}")]])
     if o["status"] == "paid":
-        return InlineKeyboardMarkup([[button("🚀 ចាប់ផ្តើមធ្វើ", BLUE, callback_data=f"adm:start:{oid}")]])
+        return InlineKeyboardMarkup([[button("🚀 ចាប់ផ្តើមធ្វើ", BLUE, "start_work", callback_data=f"adm:start:{oid}")]])
     if o["status"] == "working":
-        return InlineKeyboardMarkup([[button("🏁 រួចរាល់", GREEN, callback_data=f"adm:done:{oid}")]])
+        return InlineKeyboardMarkup([[button("🏁 រួចរាល់", GREEN, "done", callback_data=f"adm:done:{oid}")]])
     return None
 
 
@@ -332,7 +369,7 @@ async def send_payment(update: Update, context: ContextTypes.DEFAULT_TYPE, o: di
     chat_id = update.effective_chat.id
     lang = o.get("lang", DEFAULT_LANG)
     summary = order_summary(o, lang)
-    pay_buttons = [button(t("btn_cancel_order", lang), RED, callback_data=f"cancel:{o['id']}")]
+    pay_buttons = [button(t("btn_cancel_order", lang), RED, "cancel_order", callback_data=f"cancel:{o['id']}")]
 
     if PAYMENT_MODE in AUTO_MODES:
         try:
@@ -351,10 +388,10 @@ async def send_payment(update: Update, context: ContextTypes.DEFAULT_TYPE, o: di
         rows = []
         if PUBLIC_URL and pay.get("deeplink"):
             # បើក ABA Mobile ភ្លាមៗ តាមរយៈទំព័របញ្ជូនបន្តរបស់ bot
-            rows.append([button(t("btn_open_aba", lang), BLUE, url=f"{PUBLIC_URL}/aba/{o['id']}")])
+            rows.append([button(t("btn_open_aba", lang), BLUE, "open_aba", url=f"{PUBLIC_URL}/aba/{o['id']}")])
         elif pay.get("checkout_url"):
             # គ្មាន PUBLIC_URL ឬគ្មាន deeplink (test mode) — ប្រើទំព័របង់ប្រាក់របស់ RielPay
-            rows.append([button(t("btn_open_aba", lang), BLUE, url=pay["checkout_url"])])
+            rows.append([button(t("btn_open_aba", lang), BLUE, "open_aba", url=pay["checkout_url"])])
         rows.append(pay_buttons)  # bot ពិនិត្យការបង់ប្រាក់ដោយស្វ័យប្រវត្តិ — មិនចាំបាច់មានប៊ូតុងពិនិត្យ
         await context.bot.send_photo(chat_id, BytesIO(pay["qr_image"]),
                                      caption=t("pay_auto", lang, summary=summary, minutes=QR_LIFETIME_MIN),
@@ -443,7 +480,9 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     elif action == "services":
         catalog = load_services()
-        rows = [[button(tr(s["name"], lang), BLUE, callback_data=f"svc:{s['id']}")] for s in catalog["services"]]
+        cur = catalog.get("currency", "USD")
+        rows = [[button(f"{tr(s['name'], lang)} · {t('from_price', lang, price=short_money(min(p['price'] for p in s['packages']), cur))}",
+                        BLUE, f"svc_{s['id']}", callback_data=f"svc:{s['id']}")] for s in catalog["services"] if s["packages"]]
         await show(f"<b>{t('btn_services', lang)}</b>\n\n{t('choose_service', lang)}",
                    InlineKeyboardMarkup(rows + [back_button(lang)]))
 
@@ -458,12 +497,12 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         lines = [f"{p.get('icon', '📦')} <b>{esc(tr(p['name'], lang))}</b> — {money(p['price'], cur)}\n    "
                  + esc(tr(p.get("detail", ""), lang)).replace("\n", "\n    ")
                  for p in svc["packages"]]
-        rows = [[button(f"{p.get('icon', '📦')} {tr(p['name'], lang)} · {money(p['price'], cur)}", GREEN,
+        rows = [[button(f"{p.get('icon', '📦')} {tr(p['name'], lang)} · {short_money(p['price'], cur)}", GREEN, f"pkg_{sid}_{p['id']}",
                                       callback_data=f"pkg:{sid}:{p['id']}")] for p in svc["packages"]]
-        rows.append([button(t("btn_prev_services", lang), callback_data="services")])
+        rows.append([button(t("btn_prev_services", lang), icon="prev_services", callback_data="services"), *back_button(lang)])
         await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n\n{esc(tr(svc['description'], lang))}\n\n"
                    + "\n\n".join(lines) + f"\n\n{t('choose_package', lang)}",
-                   InlineKeyboardMarkup(rows + [back_button(lang)]))
+                   InlineKeyboardMarkup(rows))
 
     elif action.startswith("pkg:"):
         _, sid, pid = action.split(":")
@@ -474,7 +513,7 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.user_data["draft"] = {"sid": sid, "pid": pid}
         await show(f"<b>{esc(tr(svc['name'], lang))}</b>\n{pkg.get('icon', '📦')} {esc(tr(pkg['name'], lang))} — {money(pkg['price'], cur)}"
                    f"\n\n{esc(tr(svc['ask'], lang))}",
-                   InlineKeyboardMarkup([[button(t("btn_cancel", lang), RED, callback_data="menu")]]))
+                   InlineKeyboardMarkup([[button(t("btn_cancel", lang), RED, "cancel", callback_data="menu")]]))
 
     elif action == "pay":
         draft = context.user_data.pop("draft", None)
@@ -520,7 +559,13 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await show(f"<b>{t('btn_orders', lang)}</b>\n\n{body}")
 
     elif action == "contact":
-        await show(f"<b>{t('btn_contact', lang)}</b>\n\n{esc(CONTACT_TEXT) or t('no_contact', lang)}")
+        rows = []
+        if CONTACT_USERNAME:
+            rows.append([button(t("btn_chat", lang), BLUE, "chat", url=f"https://t.me/{CONTACT_USERNAME}")])
+        if CHANNEL_USERNAME:
+            rows.append([button(t("btn_channel", lang), GREEN, "channel", url=f"https://t.me/{CHANNEL_USERNAME}")])
+        await show(f"<b>{t('btn_contact', lang)}</b>\n\n{esc(CONTACT_TEXT) or t('no_contact', lang)}",
+                   InlineKeyboardMarkup(rows + [back_button(lang)]))
 
     elif action == "help":
         await show(help_text(lang))
@@ -540,14 +585,14 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     draft["info"] = update.message.text.strip()[:1000]
     summary = (f"🛒 {esc(tr(svc['name'], lang))}\n📦 {esc(tr(pkg['name'], lang))}\n"
                f"💵 <b>{money(pkg['price'], cur)}</b>\n📝 {esc(draft['info'])}")
-    rows = [[button(t("btn_pay", lang), GREEN, callback_data="pay")]]
+    rows = [[button(t("btn_pay", lang), GREEN, "pay", callback_data="pay")]]
     if CRYPTO_CONTACT:
         # បើកការជជែកជាមួយក្រុមការងារ ដោយមានព័ត៌មានការកុម្ម៉ង់សរសេររួចជាស្រេច
         message = t("crypto_message", lang, service=tr(svc["name"], lang), package=tr(pkg["name"], lang),
                     price=money(pkg["price"], cur), info=draft["info"][:300])
-        rows.append([button(t("btn_crypto", lang), BLUE,
+        rows.append([button(t("btn_crypto", lang), BLUE, "crypto",
                             url=f"https://t.me/{CRYPTO_CONTACT}?text={quote(message)}")])
-    rows.append([button(t("btn_cancel", lang), RED, callback_data="menu")])
+    rows.append([button(t("btn_cancel", lang), RED, "cancel", callback_data="menu")])
     await update.message.reply_text(t("confirm", lang, summary=summary), parse_mode=ParseMode.HTML,
                                     reply_markup=InlineKeyboardMarkup(rows))
 
@@ -635,7 +680,9 @@ ADMIN_HELP = (
     "🛠 <b>ពាក្យបញ្ជាអ្នកគ្រប់គ្រង</b>\n\n"
     "/orders — ការកុម្ម៉ង់ដែលកំពុងដំណើរការ\n"
     "/groupid — លេខ group (វាយក្នុង group ទទួលការកុម្ម៉ង់)\n"
-    "/msg លេខកុម្ម៉ង់ សារ — ផ្ញើសារទៅអតិថិជន (ឧ. ប្រគល់ Bot)\n\n"
+    "/msg លេខកុម្ម៉ង់ សារ — ផ្ញើសារទៅអតិថិជន (ឧ. ប្រគល់ Bot)\n"
+    "/icons — រូបមានចលនាលើប៊ូតុង (Premium)\n"
+    "/seticon ឈ្មោះ 🎉 — កំណត់រូបមានចលនា\n\n"
     "ប៊ូតុងលើការកុម្ម៉ង់នីមួយៗ៖\n"
     "✅ ត្រឹមត្រូវ / 🚫 មិនត្រឹមត្រូវ → 🚀 ចាប់ផ្តើមធ្វើ → ✅ រួចរាល់\n\n"
     "កែតម្លៃ និងកញ្ចប់ នៅក្នុង file <code>services.json</code>\n"
@@ -682,6 +729,80 @@ async def group_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         f"🆔 ORDER_GROUP_ID={chat.id}\n\nដាក់បន្ទាត់នេះក្នុង .env រួច restart bot។"
         + ("\n\n✅ Group នេះកំពុងទទួលការកុម្ម៉ង់។" if chat.id == ORDER_GROUP_ID else ""))
+
+
+def custom_emoji_ids(message) -> list:
+    return [e.custom_emoji_id for e in (message.entities or []) if e.type == "custom_emoji"]
+
+
+def valid_icon_key(key: str) -> bool:
+    if key in ICON_KEYS:
+        return True
+    catalog = load_services()
+    return any(key == f"svc_{s['id']}" or any(key == f"pkg_{s['id']}_{p['id']}" for p in s["packages"])
+               for s in catalog["services"])
+
+
+async def set_icon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """/seticon ឈ្មោះ 🎉  (🎉 = custom emoji ពី Premium) ឬ /seticon ឈ្មោះ <emoji_id>"""
+    if not can_manage(update):
+        return
+    args = context.args
+    ids = custom_emoji_ids(update.message)
+    icon_id = ids[0] if ids else (args[1] if len(args) > 1 and args[1].isdigit() else None)
+    if not args or not icon_id:
+        await update.message.reply_text("របៀបប្រើ៖ /seticon ឈ្មោះ 🎉\n(🎉 ត្រូវជា emoji មានចលនាពី Premium)\n\nមើលឈ្មោះទាំងអស់៖ /icons")
+        return
+    key = args[0]
+    if not valid_icon_key(key):
+        await update.message.reply_text(f"⚠️ មិនស្គាល់ឈ្មោះ «{key}»។ មើលឈ្មោះទាំងអស់៖ /icons")
+        return
+    # សាកល្បងមុនរក្សាទុក — Telegram បដិសេធ ប្រសិនបើម្ចាស់ bot គ្មាន Premium
+    test = InlineKeyboardButton("Test", callback_data="menu", api_kwargs={"icon_custom_emoji_id": icon_id})
+    try:
+        await update.message.reply_text(f"🔍 កំពុងសាកល្បងរូបសម្រាប់ «{key}»…", reply_markup=InlineKeyboardMarkup([[test]]))
+    except BadRequest as e:
+        await update.message.reply_text(f"❌ Telegram មិនទទួលយករូបនេះទេ៖ {e.message}\n"
+                                        "សូមប្រាកដថាគណនីដែលបង្កើត bot មាន Telegram Premium។")
+        return
+    ICONS[key] = icon_id
+    ICONS_FILE.write_text(json.dumps(ICONS, indent=2), encoding="utf-8")
+    await update.message.reply_text(f"✅ បានកំណត់រូបមានចលនាសម្រាប់ «{key}»។ ចុច /start ដើម្បីមើល។")
+
+
+async def delete_icon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not can_manage(update):
+        return
+    key = context.args[0] if context.args else ""
+    if ICONS.pop(key, None) is None:
+        await update.message.reply_text("របៀបប្រើ៖ /delicon ឈ្មោះ (មើល /icons)")
+        return
+    ICONS_FILE.write_text(json.dumps(ICONS, indent=2), encoding="utf-8")
+    await update.message.reply_text(f"🗑 បានលុបរូបមានចលនាសម្រាប់ «{key}»។ ប្រើ emoji ធម្មតាវិញ។")
+
+
+async def list_icons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not can_manage(update):
+        return
+    lines = [f"{'✅' if k in ICONS else '▫️'} <code>{k}</code> — {v}" for k, v in ICON_KEYS.items()]
+    catalog = load_services()
+    for s in catalog["services"]:
+        k = f"svc_{s['id']}"
+        lines.append(f"{'✅' if k in ICONS else '▫️'} <code>{k}</code> — {esc(tr(s['name'], ADMIN_LANG))}")
+        for p in s["packages"]:
+            k = f"pkg_{s['id']}_{p['id']}"
+            lines.append(f"{'✅' if k in ICONS else '▫️'} <code>{k}</code> — {esc(tr(p['name'], ADMIN_LANG))}")
+    await update.message.reply_text(
+        "✨ <b>រូបមានចលនាលើប៊ូតុង</b> (✅ = បានកំណត់)\n\n" + "\n".join(lines) +
+        "\n\n<b>កំណត់៖</b> /seticon ឈ្មោះ 🎉\n<b>លុប៖</b> /delicon ឈ្មោះ\n<b>មើល ID៖</b> /emojiid 🎉",
+        parse_mode=ParseMode.HTML)
+
+
+async def emoji_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """/emojiid 🎉🎁 → បង្ហាញ ID របស់ custom emoji"""
+    ids = custom_emoji_ids(update.message)
+    await update.message.reply_text("\n".join(f"<code>{i}</code>" for i in ids) or
+                                    "សូមផ្ញើ /emojiid ជាមួយ emoji មានចលនាពី Premium។", parse_mode=ParseMode.HTML)
 
 
 async def my_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -780,6 +901,10 @@ def main() -> None:
     app.add_handler(CommandHandler("language", language_cmd))
     app.add_handler(CommandHandler("myid", my_id))
     app.add_handler(CommandHandler("groupid", group_id))
+    app.add_handler(CommandHandler("seticon", set_icon))
+    app.add_handler(CommandHandler("delicon", delete_icon))
+    app.add_handler(CommandHandler("icons", list_icons))
+    app.add_handler(CommandHandler("emojiid", emoji_id))
     app.add_handler(CommandHandler("admin", admin_help))
     app.add_handler(CommandHandler("orders", list_orders))
     app.add_handler(CommandHandler("msg", message_customer))
