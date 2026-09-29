@@ -159,6 +159,7 @@ BLUE, GREEN, RED = "primary", "success", "danger"
 # កំណត់ដោយ /seticon ឈ្មោះ 🎉  ហើយរក្សាទុកក្នុង button_icons.json
 ICONS_FILE = DATA_DIR / "button_icons.json"
 ICON_KEYS = {
+    "title": "✈️ ចំណងជើង (សារស្វាគមន៍)", "pointer": "👇 សូមជ្រើសរើស… (សារ)",
     "services": "🚀 សេវាកម្ម", "orders": "📋 ការកុម្ម៉ង់ខ្ញុំ", "contact": "📨 ទំនាក់ទំនង", "help": "💡 ជំនួយ",
     "lang": "🌐 ភាសា", "channel": "📣 Channel", "back": "🏠 ម៉ឺនុយដើម", "prev_services": "↩️ សេវាកម្មទាំងអស់",
     "lang_km": "🇰🇭 ខ្មែរ", "lang_en": "🇬🇧 English", "lang_zh": "🇨🇳 中文",
@@ -178,6 +179,20 @@ def load_icons() -> dict:
 
 ICONS = load_icons()
 LEADING_EMOJI = re.compile(r"^[^\w\s]+\s+")
+
+# emoji ក្នុងអត្ថបទសារ → ឈ្មោះរូប (ប្រើរូបមានចលនាដូចគ្នានឹងប៊ូតុង)
+TEXT_EMOJI = {"✈️": "title", "👇": "pointer", "🚀": "services", "📋": "orders", "📨": "contact",
+              "💡": "help", "🌐": "lang", "📣": "channel", "💳": "pay", "🪙": "crypto", "📲": "open_aba",
+              "💬": "chat", "🏠": "back"}
+
+
+def animate(text: str) -> str:
+    """ប្តូរ emoji ក្នុងសារ HTML ទៅជារូបមានចលនា (ប្រសិនបើបានកំណត់ដោយ /seticon)"""
+    for emoji, key in TEXT_EMOJI.items():
+        icon_id = ICONS.get(key)
+        if icon_id and emoji in text:
+            text = text.replace(emoji, f'<tg-emoji emoji-id="{icon_id}">{emoji}</tg-emoji>')
+    return text
 
 
 def button(text: str, style: str = None, icon: str = None, **kwargs) -> InlineKeyboardButton:
@@ -438,21 +453,21 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         set_user_lang(user.id, lang)
         await q.answer(t("lang_set", lang))
         try:
-            await q.edit_message_text(welcome_text(lang), parse_mode=ParseMode.HTML, reply_markup=main_menu(lang))
+            await q.edit_message_text(animate(welcome_text(lang)), parse_mode=ParseMode.HTML, reply_markup=main_menu(lang))
         except BadRequest:
-            await q.message.reply_text(welcome_text(lang), parse_mode=ParseMode.HTML, reply_markup=main_menu(lang))
+            await q.message.reply_text(animate(welcome_text(lang)), parse_mode=ParseMode.HTML, reply_markup=main_menu(lang))
         return
 
     lang = user_lang(user.id)
 
     async def show(text: str, markup: InlineKeyboardMarkup = None) -> None:
         try:
-            await q.edit_message_text(text, parse_mode=ParseMode.HTML, reply_markup=markup or back_menu(lang))
+            await q.edit_message_text(animate(text), parse_mode=ParseMode.HTML, reply_markup=markup or back_menu(lang))
         except BadRequest as e:
             if "not modified" in str(e):
                 return
             # សារជារូបភាព (QR) កែអត្ថបទមិនបាន — ផ្ញើសារថ្មីជំនួស
-            await q.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=markup or back_menu(lang))
+            await q.message.reply_text(animate(text), parse_mode=ParseMode.HTML, reply_markup=markup or back_menu(lang))
 
     if action.startswith("check:"):
         oid = action.split(":", 1)[1]
@@ -572,6 +587,9 @@ async def on_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if "icon_wizard" in context.user_data and is_admin(update.effective_user.id):
+        await icon_wizard_step(update, context)
+        return
     lang = user_lang(update.effective_user.id)
     draft = context.user_data.get("draft")
     if not draft:
@@ -681,6 +699,7 @@ ADMIN_HELP = (
     "/orders — ការកុម្ម៉ង់ដែលកំពុងដំណើរការ\n"
     "/groupid — លេខ group (វាយក្នុង group ទទួលការកុម្ម៉ង់)\n"
     "/msg លេខកុម្ម៉ង់ សារ — ផ្ញើសារទៅអតិថិជន (ឧ. ប្រគល់ Bot)\n"
+    "/iconsetup — កំណត់រូបមានចលនាម្តងមួយៗ (Premium)\n"
     "/icons — រូបមានចលនាលើប៊ូតុង (Premium)\n"
     "/seticon ឈ្មោះ 🎉 — កំណត់រូបមានចលនា\n\n"
     "ប៊ូតុងលើការកុម្ម៉ង់នីមួយៗ៖\n"
@@ -757,17 +776,89 @@ async def set_icon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not valid_icon_key(key):
         await update.message.reply_text(f"⚠️ មិនស្គាល់ឈ្មោះ «{key}»។ មើលឈ្មោះទាំងអស់៖ /icons")
         return
-    # សាកល្បងមុនរក្សាទុក — Telegram បដិសេធ ប្រសិនបើម្ចាស់ bot គ្មាន Premium
-    test = InlineKeyboardButton("Test", callback_data="menu", api_kwargs={"icon_custom_emoji_id": icon_id})
+    if await save_icon(update, key, icon_id):
+        await update.message.reply_text(f"✅ បានកំណត់រូបមានចលនាសម្រាប់ «{key}»។ ចុច /start ដើម្បីមើល។")
+
+
+async def save_icon(update: Update, key: str, icon_id: str) -> bool:
+    """សាកល្បងមុនរក្សាទុក — Telegram បដិសេធ ប្រសិនបើម្ចាស់ bot គ្មាន Premium"""
+    test = InlineKeyboardButton(ICON_KEYS.get(key, key), callback_data="menu",
+                                api_kwargs={"icon_custom_emoji_id": icon_id})
     try:
-        await update.message.reply_text(f"🔍 កំពុងសាកល្បងរូបសម្រាប់ «{key}»…", reply_markup=InlineKeyboardMarkup([[test]]))
+        await update.message.reply_text("🔍 មើលជាមុន៖", reply_markup=InlineKeyboardMarkup([[test]]))
     except BadRequest as e:
         await update.message.reply_text(f"❌ Telegram មិនទទួលយករូបនេះទេ៖ {e.message}\n"
                                         "សូមប្រាកដថាគណនីដែលបង្កើត bot មាន Telegram Premium។")
-        return
+        return False
     ICONS[key] = icon_id
     ICONS_FILE.write_text(json.dumps(ICONS, indent=2), encoding="utf-8")
-    await update.message.reply_text(f"✅ បានកំណត់រូបមានចលនាសម្រាប់ «{key}»។ ចុច /start ដើម្បីមើល។")
+    return True
+
+
+# ---- ការកំណត់រូបមានចលនាម្តងមួយៗ (/iconsetup) ----
+def wizard_keys() -> list:
+    keys = ["title", "pointer", "services", "orders", "contact", "help", "lang", "channel", "back", "prev_services",
+            "pay", "crypto", "cancel", "cancel_order", "open_aba", "chat"]
+    for s in load_services()["services"]:
+        keys.append(f"svc_{s['id']}")
+        keys += [f"pkg_{s['id']}_{p['id']}" for p in s["packages"]]
+    return keys + ["lang_km", "lang_en", "lang_zh", "approve", "reject", "start_work", "done"]
+
+
+def wizard_label(key: str) -> str:
+    if key in ICON_KEYS:
+        return ICON_KEYS[key]
+    for s in load_services()["services"]:
+        if key == f"svc_{s['id']}":
+            return tr(s["name"], ADMIN_LANG)
+        for p in s["packages"]:
+            if key == f"pkg_{s['id']}_{p['id']}":
+                return f"{p.get('icon', '📦')} {tr(p['name'], ADMIN_LANG)} ({tr(s['name'], ADMIN_LANG)})"
+    return key
+
+
+async def wizard_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keys = wizard_keys()
+    i = context.user_data.get("icon_wizard", 0)
+    if i >= len(keys):
+        context.user_data.pop("icon_wizard", None)
+        await update.message.reply_text("🎉 រួចរាល់! ចុច /start ដើម្បីមើលប៊ូតុងថ្មី។\nមើលទាំងអស់៖ /icons")
+        return
+    key = keys[i]
+    now = " (មានរួចហើយ ✅)" if key in ICONS else ""
+    await update.message.reply_text(
+        f"✨ <b>{i + 1}/{len(keys)}</b> — ផ្ញើ emoji មានចលនាសម្រាប់ប៊ូតុង៖\n\n<b>{esc(wizard_label(key))}</b>{now}\n\n"
+        "/skip — រំលង · /stop — ឈប់", parse_mode=ParseMode.HTML)
+
+
+async def icon_setup(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_admin(update.effective_user.id) or update.effective_chat.type != "private":
+        await update.message.reply_text("សូមប្រើ /iconsetup ក្នុងការជជែកផ្ទាល់ជាមួយ bot (សម្រាប់ admin)។")
+        return
+    context.user_data["icon_wizard"] = 0
+    await wizard_ask(update, context)
+
+
+async def icon_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if "icon_wizard" in context.user_data:
+        context.user_data["icon_wizard"] += 1
+        await wizard_ask(update, context)
+
+
+async def icon_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if context.user_data.pop("icon_wizard", None) is not None:
+        await update.message.reply_text("⏹ បានឈប់។ ចុច /start ដើម្បីមើលប៊ូតុង · /iconsetup ដើម្បីចាប់ផ្តើមម្តងទៀត")
+
+
+async def icon_wizard_step(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    ids = custom_emoji_ids(update.message)
+    if not ids:
+        await update.message.reply_text("⚠️ សូមផ្ញើ emoji មានចលនាពីកញ្ចប់ Premium (មិនមែន emoji ធម្មតា)។\n/skip — រំលង · /stop — ឈប់")
+        return
+    key = wizard_keys()[context.user_data["icon_wizard"]]
+    if await save_icon(update, key, ids[0]):
+        context.user_data["icon_wizard"] += 1
+        await wizard_ask(update, context)
 
 
 async def delete_icon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -905,6 +996,9 @@ def main() -> None:
     app.add_handler(CommandHandler("delicon", delete_icon))
     app.add_handler(CommandHandler("icons", list_icons))
     app.add_handler(CommandHandler("emojiid", emoji_id))
+    app.add_handler(CommandHandler("iconsetup", icon_setup))
+    app.add_handler(CommandHandler("skip", icon_skip))
+    app.add_handler(CommandHandler("stop", icon_stop))
     app.add_handler(CommandHandler("admin", admin_help))
     app.add_handler(CommandHandler("orders", list_orders))
     app.add_handler(CommandHandler("msg", message_customer))
