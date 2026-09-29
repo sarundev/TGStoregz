@@ -27,7 +27,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 ADMIN_IDS = {int(x) for x in os.getenv("ADMIN_IDS", "").replace(" ", "").split(",") if x}
 # Group ទទួលការកុម្ម៉ង់ (ឧ. -1001234567890)។ សមាជិកក្នុង group អាចចុចប៊ូតុងគ្រប់គ្រងការកុម្ម៉ង់បាន
 ORDER_GROUP_ID = int(os.getenv("ORDER_GROUP_ID") or 0)
-BOT_TITLE = os.getenv("BOT_TITLE", "SB24 Store")
+BOT_TITLE = os.getenv("BOT_TITLE", "TG ExpertG")
 CONTACT_TEXT = os.getenv("CONTACT_TEXT", "")
 ADMIN_LANG = "km"  # សារទៅ admin / group ជាភាសាខ្មែរ
 

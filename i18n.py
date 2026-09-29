@@ -8,10 +8,10 @@ DEFAULT_LANG = "km"
 
 TEXTS = {
     # ---------- ប៊ូតុង ----------
-    "btn_services": {"km": "🛍️ សេវាកម្ម", "en": "🛍️ Services", "zh": "🛍️ 服务"},
-    "btn_orders": {"km": "🧾 ការកុម្ម៉ង់ខ្ញុំ", "en": "🧾 My Orders", "zh": "🧾 我的订单"},
-    "btn_contact": {"km": "💬 ទំនាក់ទំនង", "en": "💬 Contact", "zh": "💬 联系我们"},
-    "btn_help": {"km": "❓ ជំនួយ", "en": "❓ Help", "zh": "❓ 帮助"},
+    "btn_services": {"km": "🚀 សេវាកម្ម", "en": "🚀 Services", "zh": "🚀 服务"},
+    "btn_orders": {"km": "📋 ការកុម្ម៉ង់ខ្ញុំ", "en": "📋 My Orders", "zh": "📋 我的订单"},
+    "btn_contact": {"km": "📨 ទំនាក់ទំនង", "en": "📨 Contact", "zh": "📨 联系我们"},
+    "btn_help": {"km": "💡 ជំនួយ", "en": "💡 Help", "zh": "💡 帮助"},
     "btn_lang": {"km": "🌐 ភាសា", "en": "🌐 Language", "zh": "🌐 语言"},
     "btn_back": {"km": "🏠 ម៉ឺនុយដើម", "en": "🏠 Main Menu", "zh": "🏠 主菜单"},
     "btn_prev_services": {"km": "↩️ សេវាកម្មទាំងអស់", "en": "↩️ All Services", "zh": "↩️ 全部服务"},
@@ -29,17 +29,17 @@ TEXTS = {
 
     # ---------- ម៉ឺនុយ ----------
     "welcome": {
-        "km": "🛍 <b>{title}</b>\n\nសេវាកម្មតេឡេក្រាម បង់ប្រាក់ងាយស្រួលតាម <b>ABA KHQR</b>។\n\n"
+        "km": "✈️ <b>{title}</b>\n\nសេវាកម្មតេឡេក្រាម បង់ប្រាក់ងាយស្រួលតាម <b>ABA KHQR</b>។\n\n"
               "<b>{services}</b> — មើល និងកុម្ម៉ង់សេវាកម្ម។\n"
               "<b>{orders}</b> — តាមដានស្ថានភាពការកុម្ម៉ង់។\n"
               "<b>{contact}</b> — ទាក់ទងក្រុមការងារ។\n\n"
               "👇 សូមជ្រើសរើសជម្រើសខាងក្រោម។",
-        "en": "🛍 <b>{title}</b>\n\nTelegram services with easy payment via <b>ABA KHQR</b>.\n\n"
+        "en": "✈️ <b>{title}</b>\n\nTelegram services with easy payment via <b>ABA KHQR</b>.\n\n"
               "<b>{services}</b> — browse and order services.\n"
               "<b>{orders}</b> — track your order status.\n"
               "<b>{contact}</b> — reach our team.\n\n"
               "👇 Please choose an option below.",
-        "zh": "🛍 <b>{title}</b>\n\nTelegram 服务，通过 <b>ABA KHQR</b> 轻松付款。\n\n"
+        "zh": "✈️ <b>{title}</b>\n\nTelegram 服务，通过 <b>ABA KHQR</b> 轻松付款。\n\n"
               "<b>{services}</b> — 浏览并订购服务。\n"
               "<b>{orders}</b> — 查看订单状态。\n"
               "<b>{contact}</b> — 联系我们的团队。\n\n"
