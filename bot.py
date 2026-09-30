@@ -165,6 +165,8 @@ ICON_KEYS = {
     "lang_km": "🇰🇭 ខ្មែរ", "lang_en": "🇬🇧 English", "lang_zh": "🇨🇳 中文",
     "pay": "💳 បង់ប្រាក់", "crypto": "🪙 Crypto", "cancel": "✖️ បោះបង់", "cancel_order": "✖️ បោះបង់ការកុម្ម៉ង់",
     "open_aba": "📲 ABA Mobile", "chat": "💬 ជជែកជាមួយយើង",
+    "time": "⏳ រយៈពេលធ្វើ (សារ)", "warranty": "🛡 ធានា (សារ)", "training": "🎓 បង្រៀន (សារ)",
+    "results": "📈 លទ្ធផល (សារ)", "owner": "🔑 សិទ្ធិ Owner (សារ)",
     "approve": "✅ ត្រឹមត្រូវ (admin)", "reject": "✖️ មិនត្រឹមត្រូវ (admin)",
     "start_work": "🚀 ចាប់ផ្តើមធ្វើ (admin)", "done": "🏁 រួចរាល់ (admin)",
 }
@@ -183,7 +185,12 @@ LEADING_EMOJI = re.compile(r"^[^\w\s]+\s+")
 # emoji ក្នុងអត្ថបទសារ → ឈ្មោះរូប (ប្រើរូបមានចលនាដូចគ្នានឹងប៊ូតុង)
 TEXT_EMOJI = {"✈️": "title", "👇": "pointer", "🚀": "services", "📋": "orders", "📨": "contact",
               "💡": "help", "🌐": "lang", "📣": "channel", "💳": "pay", "🪙": "crypto", "📲": "open_aba",
-              "💬": "chat", "🏠": "back"}
+              "💬": "chat", "🏠": "back",
+              # ព័ត៌មានលម្អិតនៃកញ្ចប់
+              "⏳": "time", "🛡": "warranty", "🎓": "training", "📈": "results", "🔑": "owner",
+              # សេវាកម្ម និងកញ្ចប់ — ប្រើរូបដូចគ្នានឹងប៊ូតុង
+              "🤖": "svc_bot_boost", "📢": "svc_channel_active",
+              "💎": "pkg_bot_boost_full", "⭐": "pkg_bot_boost_standard"}
 
 
 def animate(text: str) -> str:
@@ -798,7 +805,8 @@ async def save_icon(update: Update, key: str, icon_id: str) -> bool:
 # ---- ការកំណត់រូបមានចលនាម្តងមួយៗ (/iconsetup) ----
 def wizard_keys() -> list:
     keys = ["title", "pointer", "services", "orders", "contact", "help", "lang", "channel", "back", "prev_services",
-            "pay", "crypto", "cancel", "cancel_order", "open_aba", "chat"]
+            "pay", "crypto", "cancel", "cancel_order", "open_aba", "chat",
+            "time", "warranty", "training", "results", "owner"]
     for s in load_services()["services"]:
         keys.append(f"svc_{s['id']}")
         keys += [f"pkg_{s['id']}_{p['id']}" for p in s["packages"]]
